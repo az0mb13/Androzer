@@ -5,7 +5,6 @@ import os
 from flask import Flask, render_template
 app = Flask(__name__)
 
-@app.route('/')
 
 
 def runall_scans(apkname):
@@ -22,20 +21,23 @@ def runall_scans(apkname):
     dconcon = 'drozer console connect -c "run ' #Initiating command
 
     #Running them in a loop
-    to_return = ""
+    to_return = []
     for command in commands:
         runme = subprocess.Popen([dconcon + command + ' ' + apkname + '"'], stdout=PIPE, universal_newlines=True, shell=True)
         (output, err) = runme.communicate()
         runme.wait()
         
-        to_return = to_return + output
-        #print(output)
+        to_return.append(output)
+      
+    print(to_return)
     return to_return
 
 
-def main():
+@app.route('/')
+def index():
+    sub_out=runall_scans('com.mwr.example.sieve')
+    return render_template('report.html', v1=sub_out[0], v2=sub_out[1], v3=sub_out[2] )
 
-    runall_scans('com.mwr.example.sieve')
 
 if __name__ == '__main__':
    app.run(debug = True)
